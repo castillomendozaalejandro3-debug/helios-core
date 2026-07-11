@@ -365,7 +365,11 @@ function buildBatchCommandLine(command, commandArgs) {
   return `"${[escapedCommand, ...escapedArgs].join(" ")}"`;
 }
 
-function checkedOutput(command, commandArgs, timeoutMs = resolveMetadataProbeTimeoutMs(process.env)) {
+function checkedOutput(
+  command,
+  commandArgs,
+  timeoutMs = resolveMetadataProbeTimeoutMs(process.env),
+) {
   const invocation = spawnInvocation(command, commandArgs, process.env, process.platform);
   const result = spawnSync(invocation.command, invocation.args, {
     cwd: repoRoot,
