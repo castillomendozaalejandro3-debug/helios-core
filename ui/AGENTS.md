@@ -1,4 +1,4 @@
-# Control UI Guide
+# Control UI Guide for Helios
 
 This directory owns Control UI-specific guidance that should not live in the repo root.
 

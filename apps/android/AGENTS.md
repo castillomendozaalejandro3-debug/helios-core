@@ -1,4 +1,4 @@
-# Android Release Agent Policy
+# Android Release Agent Policy for Helios
 
 Root rules still apply. This file adds the Android release guardrails.
 

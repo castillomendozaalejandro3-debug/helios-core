@@ -1,31 +1,31 @@
-# 🦞 OpenClaw — Personal AI Assistant
+# 🌟 Helios — Autonomous AI Assistant
 
 <p align="center">
     <picture>
-        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/openclaw-banner-light.png">
-        <img src="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/openclaw-banner-dark.png" alt="OpenClaw — EXFOLIATE! EXFOLIATE! Your personal AI assistant, running on your own devices.">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/yourusername/helios/main/docs/assets/helios-banner-light.png">
+    <img src="https://raw.githubusercontent.com/yourusername/helios/main/docs/assets/helios-banner-dark.png" alt="Helios — Your Personal Autonomous AI Assistant">
     </picture>
 </p>
 
 <p align="center">
-  <a href="https://github.com/openclaw/openclaw/actions/workflows/ci.yml?branch=main"><img src="https://img.shields.io/github/actions/workflow/status/openclaw/openclaw/ci.yml?branch=main&style=for-the-badge" alt="CI status"></a>
-  <a href="https://github.com/openclaw/openclaw/releases"><img src="https://img.shields.io/github/v/release/openclaw/openclaw?include_prereleases&style=for-the-badge" alt="GitHub release"></a>
-  <a href="https://discord.gg/clawd"><img src="https://img.shields.io/discord/1456350064065904867?label=Discord&logo=discord&logoColor=white&color=5865F2&style=for-the-badge" alt="Discord"></a>
+  <a href="https://github.com/yourusername/helios/actions/workflows/ci.yml?branch=main"><img src="https://img.shields.io/github/actions/workflow/status/yourusername/helios/ci.yml?branch=main&style=for-the-badge" alt="CI status"></a>
+  <a href="https://github.com/yourusername/helios/releases"><img src="https://img.shields.io/github/v/release/yourusername/helios?include_prereleases&style=for-the-badge" alt="GitHub release"></a>
+  <a href="https://discord.gg/helios"><img src="https://img.shields.io/discord/1456350064065904867?label=Discord&logo=discord&logoColor=white&color=5865F2&style=for-the-badge" alt="Discord"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="MIT License"></a>
 </p>
 
-**OpenClaw** is a _personal AI assistant_ you run on your own devices.
+**Helios** is a _personal autonomous AI assistant_ that runs on your own devices.
 It answers you on the channels you already use. It can speak and listen on macOS/iOS/Android, and can render a live Canvas you control. The Gateway is just the control plane — the product is the assistant.
 
 If you want a personal, single-user assistant that feels local, fast, and always-on, this is it.
 
 Supported channels include: WhatsApp, Telegram, Slack, Discord, Google Chat, Signal, iMessage, IRC, Microsoft Teams, Matrix, Feishu, LINE, Mattermost, Nextcloud Talk, Nostr, Synology Chat, Tlon, Twitch, Zalo, Zalo Personal, WeChat, QQ, WebChat.
 
-[Website](https://openclaw.ai) · [Docs](https://docs.openclaw.ai) · [Vision](VISION.md) · [Third-party notices](THIRD_PARTY_NOTICES.md) · [DeepWiki](https://deepwiki.com/openclaw/openclaw) · [Getting Started](https://docs.openclaw.ai/start/getting-started) · [Updating](https://docs.openclaw.ai/install/updating) · [Showcase](https://docs.openclaw.ai/start/showcase) · [FAQ](https://docs.openclaw.ai/help/faq) · [Onboarding](https://docs.openclaw.ai/start/wizard) · [Nix](https://github.com/openclaw/nix-openclaw) · [Docker](https://docs.openclaw.ai/install/docker) · [Discord](https://discord.gg/clawd)
+[Website](https://helios.ai) · [Docs](https://docs.helios.ai) · [Vision](VISION.md) · [Third-party notices](THIRD_PARTY_NOTICES.md) · [DeepWiki](https://deepwiki.com/helios/helios) · [Getting Started](https://docs.helios.ai/start/getting-started) · [Updating](https://docs.helios.ai/install/updating) · [Showcase](https://docs.helios.ai/start/showcase) · [FAQ](https://docs.helios.ai/help/faq) · [Onboarding](https://docs.helios.ai/start/wizard) · [Nix](https://github.com/yourusername/nix-helios) · [Docker](https://docs.helios.ai/install/docker) · [Discord](https://discord.gg/helios)
 
 New install? Start here: [Getting started](https://docs.openclaw.ai/start/getting-started)
 
-Preferred setup: run `openclaw onboard` in your terminal.
+Preferred setup: run `helios onboard` in your terminal.
 OpenClaw Onboard guides you step by step through setting up the gateway, workspace, channels, and skills. It is the recommended CLI setup path and works on **macOS, Linux, and Windows**.
 Windows desktop users can start with the native [Windows Hub](https://docs.openclaw.ai/platforms/windows) companion app for setup, tray status, chat, node mode, and local MCP mode.
 Works with npm, pnpm, or bun.
@@ -96,10 +96,10 @@ Model note: while many providers and models are supported, prefer a current flag
 Runtime: **Node 24 (recommended) or Node 22.19+**.
 
 ```bash
-npm install -g openclaw@latest
-# or: pnpm add -g openclaw@latest
+npm install -g helios@latest
+# or: pnpm add -g helios@latest
 
-openclaw onboard --install-daemon
+helios onboard --install-daemon
 ```
 
 OpenClaw Onboard installs the Gateway daemon (launchd/systemd user service) so it stays running.
@@ -108,61 +108,61 @@ OpenClaw Onboard installs the Gateway daemon (launchd/systemd user service) so i
 
 Runtime: **Node 24 (recommended) or Node 22.19+**.
 
-Full beginner guide (auth, pairing, channels): [Getting started](https://docs.openclaw.ai/start/getting-started)
+Full beginner guide (auth, pairing, channels): [Getting started](https://docs.helios.ai/start/getting-started)
 
 Recommended daemon mode:
 
 ```bash
-openclaw onboard --install-daemon
-openclaw gateway status
+helios onboard --install-daemon
+helios gateway status
 ```
 
 Foreground/debug mode:
 
 ```bash
-openclaw gateway stop
-openclaw gateway --port 18789 --verbose
+helios gateway stop
+helios gateway --port 18789 --verbose
 ```
 
 Send a test message or ask the assistant after either startup mode is running:
 
 ```bash
 # Send a message
-openclaw message send --target +1234567890 --message "Hello from OpenClaw"
+helios message send --target +1234567890 --message "Hello from Helios"
 
 # Talk to the assistant (optionally deliver back to any connected channel: WhatsApp/Telegram/Slack/Discord/Google Chat/Signal/iMessage/IRC/Microsoft Teams/Matrix/Feishu/LINE/Mattermost/Nextcloud Talk/Nostr/Synology Chat/Tlon/Twitch/Zalo/Zalo Personal/WeChat/QQ/WebChat)
-openclaw agent --message "Ship checklist" --thinking high
+helios agent --message "Ship checklist" --thinking high
 ```
 
-Upgrading? [Updating guide](https://docs.openclaw.ai/install/updating) (and run `openclaw doctor`).
+Upgrading? [Updating guide](https://docs.helios.ai/install/updating) (and run `helios doctor`).
 
 Models config + CLI: [Models](https://docs.openclaw.ai/concepts/models). Auth profile rotation + fallbacks: [Model failover](https://docs.openclaw.ai/concepts/model-failover).
 
 ## Security defaults (DM access)
 
-OpenClaw connects to real messaging surfaces. Treat inbound DMs as **untrusted input**.
+Helios connects to real messaging surfaces. Treat inbound DMs as **untrusted input**.
 
-Full security guide: [Security](https://docs.openclaw.ai/gateway/security).
-Before remote exposure, use the [Gateway exposure runbook](https://docs.openclaw.ai/gateway/security/exposure-runbook).
+Full security guide: [Security](https://docs.helios.ai/gateway/security).
+Before remote exposure, use the [Gateway exposure runbook](https://docs.helios.ai/gateway/security/exposure-runbook).
 
 Default behavior on Telegram/WhatsApp/Signal/iMessage/Microsoft Teams/Discord/Google Chat/Slack:
 
 - **DM pairing** (`dmPolicy="pairing"` / `channels.discord.dmPolicy="pairing"` / `channels.slack.dmPolicy="pairing"`; legacy: `channels.discord.dm.policy`, `channels.slack.dm.policy`): unknown senders receive a short pairing code and the bot does not process their message.
-- Approve with: `openclaw pairing approve <channel> <code>` (then the sender is added to a local allowlist store).
+- Approve with: `helios pairing approve <channel> <code>` (then the sender is added to a local allowlist store).
 - Public inbound DMs require an explicit opt-in: set `dmPolicy="open"` and include `"*"` in the channel allowlist (`allowFrom` / `channels.discord.allowFrom` / `channels.slack.allowFrom`; legacy: `channels.discord.dm.allowFrom`, `channels.slack.dm.allowFrom`).
 
-Run `openclaw doctor` to surface risky/misconfigured DM policies.
+Run `helios doctor` to surface risky/misconfigured DM policies.
 
 ## Highlights
 
-- **[Local-first Gateway](https://docs.openclaw.ai/gateway)** — single control plane for sessions, channels, tools, and events.
-- **[Multi-channel inbox](https://docs.openclaw.ai/channels)** — WhatsApp, Telegram, Slack, Discord, Google Chat, Signal, iMessage, IRC, Microsoft Teams, Matrix, Feishu, LINE, Mattermost, Nextcloud Talk, Nostr, Synology Chat, Tlon, Twitch, Zalo, Zalo Personal, WeChat, QQ, WebChat, macOS, iOS/Android.
-- **[Multi-agent routing](https://docs.openclaw.ai/gateway/configuration)** — route inbound channels/accounts/peers to isolated agents (workspaces + per-agent sessions).
-- **[Voice Wake](https://docs.openclaw.ai/nodes/voicewake) + [Talk Mode](https://docs.openclaw.ai/nodes/talk)** — wake words on macOS/iOS and continuous voice on Android (ElevenLabs + system TTS fallback).
-- **[Live Canvas](https://docs.openclaw.ai/platforms/mac/canvas)** — agent-driven visual workspace with [A2UI](https://docs.openclaw.ai/platforms/mac/canvas#canvas-a2ui).
-- **[First-class tools](https://docs.openclaw.ai/tools)** — browser, canvas, nodes, cron, sessions, and Discord/Slack actions.
-- **[Companion apps](https://docs.openclaw.ai/platforms)** — Windows Hub, macOS menu bar app, and iOS/Android [nodes](https://docs.openclaw.ai/nodes).
-- **[Onboarding](https://docs.openclaw.ai/start/wizard) + [skills](https://docs.openclaw.ai/tools/skills)** — onboarding-driven setup with bundled/managed/workspace skills.
+- **[Local-first Gateway](https://docs.helios.ai/gateway)** — single control plane for sessions, channels, tools, and events.
+- **[Multi-channel inbox](https://docs.helios.ai/channels)** — WhatsApp, Telegram, Slack, Discord, Google Chat, Signal, iMessage, IRC, Microsoft Teams, Matrix, Feishu, LINE, Mattermost, Nextcloud Talk, Nostr, Synology Chat, Tlon, Twitch, Zalo, Zalo Personal, WeChat, QQ, WebChat, macOS, iOS/Android.
+- **[Multi-agent routing](https://docs.helios.ai/gateway/configuration)** — route inbound channels/accounts/peers to isolated agents (workspaces + per-agent sessions).
+- **[Voice Wake](https://docs.helios.ai/nodes/voicewake) + [Talk Mode](https://docs.helios.ai/nodes/talk)** — wake words on macOS/iOS and continuous voice on Android (ElevenLabs + system TTS fallback).
+- **[Live Canvas](https://docs.helios.ai/platforms/mac/canvas)** — agent-driven visual workspace with [A2UI](https://docs.helios.ai/platforms/mac/canvas#canvas-a2ui).
+- **[First-class tools](https://docs.helios.ai/tools)** — browser, canvas, nodes, cron, sessions, and Discord/Slack actions.
+- **[Companion apps](https://docs.helios.ai/platforms)** — Windows Hub, macOS menu bar app, and iOS/Android [nodes](https://docs.helios.ai/nodes).
+- **[Onboarding](https://docs.helios.ai/start/wizard) + [skills](https://docs.helios.ai/tools/skills)** — onboarding-driven setup with bundled/managed/workspace skills.
 
 ## Security model (important)
 
@@ -260,18 +260,18 @@ Note: `pnpm openclaw ...` runs TypeScript directly (via `tsx`). `pnpm build` pro
 - **beta**: prerelease tags (`vYYYY.M.D-beta.N`), npm dist-tag `beta` (macOS app may be missing).
 - **dev**: moving head of `main`, npm dist-tag `dev` (when published).
 
-Switch channels (git + npm): `openclaw update --channel stable|beta|dev`.
-Details: [Development channels](https://docs.openclaw.ai/install/development-channels).
+Switch channels (git + npm): `helios update --channel stable|beta|dev`.
+Details: [Development channels](https://docs.helios.ai/install/development-channels).
 
 ## Agent workspace + skills
 
-- Workspace root: `~/.openclaw/workspace` (configurable via `agents.defaults.workspace`).
+- Workspace root: `~/.helios/workspace` (configurable via `agents.defaults.workspace`).
 - Injected prompt files: `AGENTS.md`, `SOUL.md`, `TOOLS.md`.
-- Skills: `~/.openclaw/workspace/skills/<skill>/SKILL.md`.
+- Skills: `~/.helios/workspace/skills/<skill>/SKILL.md`.
 
 ## Configuration
 
-Minimal `~/.openclaw/openclaw.json` (model + defaults):
+Minimal `~/.helios/helios.json` (model + defaults):
 
 ```json5
 {
@@ -285,23 +285,23 @@ Minimal `~/.openclaw/openclaw.json` (model + defaults):
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=openclaw/openclaw&type=date&legend=top-left)](https://www.star-history.com/#openclaw/openclaw&type=date&legend=top-left)
+[![Star History Chart](https://api.star-history.com/svg?repos=yourusername/helios&type=date&legend=top-left)](https://www.star-history.com/#yourusername/helios&type=date&legend=top-left)
 
 ## Molty
 
-OpenClaw was built for **Molty**, a space lobster AI assistant. 🦞
+Helios was built for **Molty**, a space lobster AI assistant. 🌟
 by Peter Steinberger and the community.
 
-- [openclaw.ai](https://openclaw.ai)
+- [helios.ai](https://helios.ai)
 - [soul.md](https://soul.md)
 - [steipete.me](https://steipete.me)
-- [@openclaw](https://x.com/openclaw)
+- [@helios](https://x.com/helios)
 
 ## Community
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines, maintainers, and how to submit PRs.
-Use the [issue chooser](https://github.com/openclaw/openclaw/issues/new/choose) for bugs, docs bugs, and feature requests;
-ask setup/support questions in [Discord](https://discord.gg/clawd); and report vulnerabilities through [SECURITY.md](SECURITY.md).
+Use the [issue chooser](https://github.com/yourusername/helios/issues/new/choose) for bugs, docs bugs, and feature requests;
+ask setup/support questions in [Discord](https://discord.gg/helios); and report vulnerabilities through [SECURITY.md](SECURITY.md).
 PRs should link the relevant issue when possible and follow the [PR template](.github/pull_request_template.md) with problem, impact, and evidence.
 AI/vibe-coded PRs welcome! 🤖
 

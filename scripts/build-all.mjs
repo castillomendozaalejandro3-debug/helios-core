@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Builds OpenClaw packages and plugin SDK artifacts with cache-aware orchestration.
+// Builds Helios packages and plugin SDK artifacts with cache-aware orchestration.
 
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -11,10 +11,10 @@ import { pluginSdkEntrypoints } from "./lib/plugin-sdk-entries.mjs";
 import { resolvePnpmRunner } from "./pnpm-runner.mjs";
 
 const nodeBin = process.execPath;
-const BUILD_CACHE_VERSION = 3;
+const BUILD_CACHE_VERSION = 4;
 const PLUGIN_SDK_ENTRY_DTS_CACHE_ENV = [
-  "OPENCLAW_BUILD_PRIVATE_QA",
-  "OPENCLAW_PLUGIN_SDK_CANONICAL_DTS",
+  "HELIOS_BUILD_PRIVATE_QA",
+  "HELIOS_PLUGIN_SDK_CANONICAL_DTS",
 ];
 const PLUGIN_SDK_ENTRY_DTS_CACHE_INPUTS = [
   "scripts/write-plugin-sdk-entry-dts.ts",
@@ -204,7 +204,7 @@ export function buildAllUsage() {
   return [
     "Usage: node scripts/build-all.mjs [profile]",
     "",
-    "Builds OpenClaw artifacts for the selected profile.",
+    "Builds Helios artifacts for the selected profile.",
     "",
     "Profiles:",
     ...Object.keys(BUILD_ALL_PROFILES).map((profile) => `  ${profile}`),
@@ -281,7 +281,7 @@ export function resolveBuildAllStep(step, params = {}) {
   const env = resolveStepEnv(step, params.env ?? process.env, platform);
   if (step.kind === "pnpm") {
     const nodeFallbackArgs =
-      env.OPENCLAW_BUILD_ALL_NO_PNPM === "1" ? PNPM_STEP_NODE_FALLBACKS.get(step.label) : undefined;
+      env.HELIOS_BUILD_ALL_NO_PNPM === "1" ? PNPM_STEP_NODE_FALLBACKS.get(step.label) : undefined;
     if (nodeFallbackArgs) {
       return {
         command: params.nodeExecPath ?? nodeBin,
@@ -591,7 +591,7 @@ if (isMainModule()) {
     for (const step of resolveBuildAllSteps(args.profile)) {
       const startedAt = performance.now();
       const cacheState = resolveBuildAllStepCacheState(step);
-      if (process.env.OPENCLAW_BUILD_CACHE !== "0" && cacheState.fresh) {
+      if (process.env.HELIOS_BUILD_CACHE !== "0" && cacheState.fresh) {
         restoreBuildAllStepCacheOutputs(cacheState);
         const durationMs = performance.now() - startedAt;
         timings.push({ label: step.label, status: "cached", durationMs });

@@ -1,22 +1,22 @@
 ---
-summary: "OpenClaw is a multi-channel gateway for AI agents that runs on any OS."
+summary: "Helios is a multi-channel gateway for AI agents that runs on any OS."
 read_when:
   - Introducing OpenClaw to newcomers
-title: "OpenClaw"
+title: "Helios"
 ---
 
-# OpenClaw 🦞
+# Helios 🌟
 
 <p align="center">
     <img
-        src="/assets/openclaw-hero-light.png"
-        alt="OpenClaw"
+        src="/assets/helios-hero-light.png"
+        alt="Helios"
         width="500"
         class="dark:hidden"
     />
     <img
-        src="/assets/openclaw-hero-dark.png"
-        alt="OpenClaw"
+        src="/assets/helios-hero-dark.png"
+        alt="Helios"
         width="500"
         class="hidden dark:block"
     />
@@ -31,10 +31,10 @@ title: "OpenClaw"
 
 <Columns>
   <Card title="Get Started" href="/start/getting-started" icon="rocket">
-    Install OpenClaw and bring up the Gateway in minutes.
+    Install Helios and bring up the Gateway in minutes.
   </Card>
   <Card title="Run Onboarding" href="/start/wizard" icon="list-checks">
-    Guided setup with `openclaw onboard` and pairing flows.
+    Guided setup with `helios onboard` and pairing flows.
   </Card>
   <Card title="Connect a Channel" href="/channels" icon="message-circle">
     Link Discord, Signal, Telegram, WhatsApp, and more to chat from anywhere.
@@ -44,9 +44,9 @@ title: "OpenClaw"
   </Card>
 </Columns>
 
-## What is OpenClaw?
+## What is Helios?
 
-OpenClaw is a **self-hosted gateway** that connects your favorite chat apps — Discord, Google Chat, iMessage, Matrix, Microsoft Teams, Signal, Slack, Telegram, WhatsApp, Zalo, and more via channel plugins — to AI coding agents. You run a single Gateway process on your own machine (or a server), and it becomes the bridge between your messaging apps and an always-available AI assistant.
+Helios is a **self-hosted gateway** that connects your favorite chat apps — Discord, Google Chat, iMessage, Matrix, Microsoft Teams, Signal, Slack, Telegram, WhatsApp, Zalo, and more via channel plugins — to AI coding agents. You run a single Gateway process on your own machine (or a server), and it becomes the bridge between your messaging apps and an always-available AI assistant.
 
 **Who is it for?** Developers and power users who want a personal AI assistant they can message from anywhere — without giving up control of their data or relying on a hosted service.
 
