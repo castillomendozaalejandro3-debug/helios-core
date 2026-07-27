@@ -1,142 +1,48 @@
-import { MemoryEngine } from './memory/MemoryEngine';
-import { DecisionEngine } from './decision/DecisionEngine';
-import { PersonalityCore } from './personality/PersonalityCore';
-import { HealthMonitor } from './monitoring/HealthMonitor';
-import { FinancialAutonomyEngine } from './economy/FinancialAutonomyEngine';
-import { AutonomousRevenueLoop } from './core/AutonomousRevenueLoop';
-import { Safeguards } from './safeguards/Safeguards';
-import { HealthDashboard } from './safeguards/HealthDashboard';
+import { ConfigManager } from './config/ConfigManager';
 import { SystemReadiness } from './core/SystemReadiness';
-import { MemoryEngine } from './memory/MemoryEngine';
-import { DecisionEngine } from './decision/DecisionEngine';
-import { PersonalityCore } from './personality/PersonalityCore';
-import { HealthMonitor } from './monitoring/HealthMonitor';
-import { FinancialAutonomyEngine } from './economy/FinancialAutonomyEngine';
 import { AutonomousRevenueLoop } from './core/AutonomousRevenueLoop';
-import { Safeguards } from './safeguards/Safeguards';
-import { HealthDashboard } from './safeguards/HealthDashboard';
 
-class Helios {
-  private memory: MemoryEngine;
-  private decision: DecisionEngine;
-  private personality: PersonalityCore;
-  private health: HealthMonitor;
-  private finance: FinancialAutonomyEngine;
-  private revenueLoop: AutonomousRevenueLoop;
-  private safeguards: Safeguards;
-  private healthDashboard: HealthDashboard;
-  private systemReadiness: SystemReadiness;
-
-  constructor() {
-    // Inicialización de los núcleos reales
-    this.memory = new MemoryEngine();
-    this.decision = new DecisionEngine();
-    this.personality = new PersonalityCore();
-    this.health = new HealthMonitor();
-    this.finance = new FinancialAutonomyEngine();
-    this.revenueLoop = new AutonomousRevenueLoop();
-    this.systemReadiness = new SystemReadiness();
+async function main() {
+  console.log('🚀 INICIANDO SECUENCIA DE ARRANQUE DE HELIOS...\n');
+  
+  try {
+    // Ejecutar diagnóstico de sistema antes de iniciar el loop
+    const readiness = new SystemReadiness();
+    const report = await readiness.runFullDiagnostic();
     
-    // Inicialización de la capa de seguridad
-    const agentFactory = new (require('./agents/AgentFactory').AgentFactory)();
-    const orchestrator = new (require('./agents/AgentOrchestrator').AgentOrchestrator)();
-    this.safeguards = new Safeguards(
-      this.finance,
-      this.revenueLoop,
-      agentFactory,
-      orchestrator,
-      this.decision,
-      this.memory
-    );
+    console.log('📊 REPORTE DE ESTADO DEL SISTEMA:');
+    console.log(`- Listo para lanzar: ${report.isReadyToLaunch ? '✅ SÍ' : '❌ NO'}`);
+    console.log(`- Timestamp: ${report.timestamp.toISOString()}`);
     
-    this.healthDashboard = new HealthDashboard(this.safeguards);
-  }
-
-  // Propósito: Iniciar todos los subsistemas de Helios.
-  public async boot(): Promise<void> {
-    // 1. Ejecutar diagnóstico de sistema
-    console.log('Ejecutando diagnóstico de sistema...');
-    const readinessReport = await this.systemReadiness.runFullDiagnostic();
-    
-    if (!readinessReport.isReadyToLaunch) {
-      console.error('❌ Helios no está listo para arrancar. Reporte de diagnóstico:');
-      console.error(`   Timestamp: ${new Date(readinessReport.timestamp).toISOString()}`);
-      console.error(`   Estado general: ${readinessReport.isReadyToLaunch ? 'READY' : 'NOT READY'}`);
-      console.error('   Subsistemas:');
-      readinessReport.subsystems.forEach(subsystem => {
-        console.error(`     - ${subsystem.name}: ${subsystem.status} - ${subsystem.message}`);
-      });
-      if (readinessReport.missingEnvVariables.length > 0) {
-        console.error('   Variables de entorno faltantes:');
-        readinessReport.missingEnvVariables.forEach(varName => {
-          console.error(`     - ${varName}`);
-        });
+    // Mostrar estado de cada módulo
+    Object.entries(report.modules).forEach(([module, result]) => {
+      const statusEmoji = result.status === 'OK' ? '✅' : result.status === 'WARNING' ? '⚠️' : '❌';
+      console.log(`- ${module}: ${statusEmoji} ${result.message}`);
+      if (result.details) {
+        console.log(`  Detalles: ${result.details}`);
       }
-      console.error('❌ Helios se detendrá debido a errores críticos en el diagnóstico.');
+    });
+    
+    if (!report.isReadyToLaunch) {
+      console.log('\n❌ HELIOS CORE: DETENIDO. Fallos críticos detectados en el diagnóstico.');
+      console.log('Errores encontrados:');
+      report.errors.forEach((error, index) => {
+        console.log(`  ${index + 1}. ${error}`);
+      });
+      console.log('\nPor favor, revise la configuración y los servicios requeridos antes de reiniciar.');
       process.exit(1);
     }
     
-    console.log('✅ Diagnóstico de sistema completado con éxito.');
+    console.log('\n✅ HELIOS CORE: ONLINE. Iniciando el AutonomousRevenueLoop...');
     
-    // 2. Inicializar la base de datos vectorial (LanceDB)
-    await this.memory.init();
+    // Iniciar el loop de ingresos autónomos
+    const revenueLoop = new AutonomousRevenueLoop();
+    await revenueLoop.start();
     
-    // 3. Cargar personalidad y estado financiero desde disco
-    // (Lógica real de carga de estado si aplica)
-    
-    // 4. Arrancar el bucle de supervivencia económica
-    this.revenueLoop.start(3600000); // Evaluar cada 1 hora
-    
-    // 5. Iniciar el dashboard de salud
-    this.healthDashboard.startMonitoring(30000);
-    
-    // 6. Configurar el apagado seguro
-    this.setupGracefulShutdown();
-  }
-
-  // Propósito: Apagar Helios de forma segura sin corromper el ledger ni la memoria.
-  private setupGracefulShutdown(): void {
-    const shutdown = async (signal: string) => {
-      console.log(`Recibido ${signal}, iniciando apagado seguro...`);
-      
-      // 1. Verificar condiciones de emergencia antes de apagar
-      if (this.safeguards.checkEmergencyConditions()) {
-        await this.safeguards.activateKillSwitch(`Emergencia detectada al recibir ${signal}`);
-      }
-      
-      // 2. Detener el bucle de revenue
-      this.revenueLoop.stop();
-      
-      // 3. Forzar guardado del ledger financiero en disco
-      // El FinancialAutonomyEngine ya guarda automáticamente en cada transacción
-      // Pero forzamos un guardado final para asegurar el estado
-      try {
-        // Accedemos al método privado de guardado del ledger
-        (this.finance as any).saveLedger();
-      } catch (error) {
-        console.error('Error al guardar el ledger financiero:', error);
-      }
-      
-      // 4. Cerrar conexiones de la base de datos (LanceDB)
-      try {
-        // En LanceDB, no hay un método explícito de cierre, pero podemos intentar liberar recursos
-        // En una implementación real, esto interactuaría con el cliente de LanceDB
-      } catch (error) {
-        console.error('Error al cerrar conexiones de LanceDB:', error);
-      }
-      
-      console.log('Helios apagado correctamente.');
-      process.exit(0);
-    };
-
-    process.on('SIGINT', () => shutdown('SIGINT'));
-    process.on('SIGTERM', () => shutdown('SIGTERM'));
+  } catch (error) {
+    console.error('FALLO CRÍTICO EN EL ARRANQUE:', error);
+    process.exit(1);
   }
 }
 
-// Instancia y arranque real
-const helios = new Helios();
-helios.boot().catch(err => {
-  console.error('Error al iniciar Helios:', err);
-  process.exit(1);
-});
+main();

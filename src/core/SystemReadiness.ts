@@ -3,188 +3,124 @@ import { SecureVault } from '../security/SecureVault';
 import { MemoryEngine } from '../memory/MemoryEngine';
 import { FinancialAutonomyEngine } from '../economy/FinancialAutonomyEngine';
 
-export type SubsystemStatus = 'READY' | 'WARNING' | 'CRITICAL';
-
-export interface SubsystemReport {
-  name: string;
-  status: SubsystemStatus;
-  message: string; // Detalle técnico del error o éxito
+interface DiagnosticResult {
+  status: 'OK' | 'ERROR' | 'WARNING';
+  message: string;
+  details?: any;
 }
 
-export interface BootReport {
-  timestamp: number;
+interface SystemReadinessReport {
   isReadyToLaunch: boolean;
-  subsystems: SubsystemReport[];
-  missingEnvVariables: string[];
+  timestamp: Date;
+  modules: {
+    config: DiagnosticResult;
+    secureVault: DiagnosticResult;
+    memory: DiagnosticResult;
+    financial: DiagnosticResult;
+  };
+  errors: string[];
 }
 
-export class SystemReadiness {
-  private config: ConfigManager;
-  private vault: SecureVault;
-  private memory: MemoryEngine;
-  private finance: FinancialAutonomyEngine;
+class SystemReadiness {
+  private configManager: ConfigManager;
+  private secureVault: SecureVault;
+  private memoryEngine: MemoryEngine;
+  private financialEngine: FinancialAutonomyEngine;
 
   constructor() {
-    this.config = ConfigManager.getInstance();
-    this.vault = new SecureVault();
-    this.memory = new MemoryEngine();
-    this.finance = new FinancialAutonomyEngine();
+    this.configManager = ConfigManager.getInstance();
+    this.secureVault = new SecureVault();
+    this.memoryEngine = new MemoryEngine();
+    this.financialEngine = new FinancialAutonomyEngine();
   }
 
-  // Propósito: Ejecutar el diagnóstico completo de todos los subsistemas.
-  public async runFullDiagnostic(): Promise<BootReport> {
-    const report: BootReport = {
-      timestamp: Date.now(),
+  async runFullDiagnostic(): Promise<SystemReadinessReport> {
+    const report: SystemReadinessReport = {
       isReadyToLaunch: true,
-      subsystems: [],
-      missingEnvVariables: []
+      timestamp: new Date(),
+      modules: {
+        config: { status: 'OK', message: 'ConfigManager cargado correctamente' },
+        secureVault: { status: 'OK', message: 'SecureVault inicializado correctamente' },
+        memory: { status: 'OK', message: 'MemoryEngine inicializado correctamente' },
+        financial: { status: 'OK', message: 'FinancialAutonomyEngine inicializado correctamente' }
+      },
+      errors: []
     };
 
-    // 1. Diagnóstico de Configuración (.env)
+    // Diagnóstico de Configuración
     try {
-      // Get security config to verify critical variables exist
-      const securityConfig = this.config.getSecurityConfig();
-      const missingVars: string[] = [];
-      
-      // Check for required environment variables
-      if (!securityConfig.HELIOS_MASTER_KEY || securityConfig.HELIOS_MASTER_KEY.trim() === '') {
-        missingVars.push('HELIOS_MASTER_KEY');
-      }
-      if (!securityConfig.STRIPE_SECRET_KEY || securityConfig.STRIPE_SECRET_KEY.trim() === '') {
-        missingVars.push('STRIPE_SECRET_KEY');
-      }
-      if (!securityConfig.OPENAI_API_KEY || securityConfig.OPENAI_API_KEY.trim() === '') {
-        missingVars.push('OPENAI_API_KEY');
-      }
-      if (!securityConfig.GITHUB_TOKEN || securityConfig.GITHUB_TOKEN.trim() === '') {
-        missingVars.push('GITHUB_TOKEN');
-      }
-      if (!securityConfig.GOOGLE_API_KEY || securityConfig.GOOGLE_API_KEY.trim() === '') {
-        missingVars.push('GOOGLE_API_KEY');
-      }
-      if (!securityConfig.AWS_ACCESS_KEY_ID || securityConfig.AWS_ACCESS_KEY_ID.trim() === '') {
-        missingVars.push('AWS_ACCESS_KEY_ID');
-      }
-      if (!securityConfig.AWS_SECRET_ACCESS_KEY || securityConfig.AWS_SECRET_ACCESS_KEY.trim() === '') {
-        missingVars.push('AWS_SECRET_ACCESS_KEY');
-      }
-      
-      // Check LLM config
-      const llmConfig = this.config.getLLMConfig();
-      if (!llmConfig.OPENROUTER_API_KEY || llmConfig.OPENROUTER_API_KEY.trim() === '') {
-        missingVars.push('OPENROUTER_API_KEY');
-      }
-      
-      if (missingVars.length > 0) {
-        report.missingEnvVariables = missingVars;
-        report.subsystems.push({
-          name: 'ConfigManager',
-          status: 'CRITICAL',
-          message: `Faltan variables de entorno críticas: ${missingVars.join(', ')}`
-        });
-        report.isReadyToLaunch = false;
-      } else {
-        report.subsystems.push({
-          name: 'ConfigManager',
-          status: 'READY',
-          message: 'Todas las variables de entorno críticas están presentes y válidas'
-        });
+      const securityConfig = this.configManager.getSecurityConfig();
+      if (!securityConfig.masterKey || securityConfig.masterKey.trim() === '') {
+        throw new Error('HELIOS_MASTER_KEY no está configurado o está vacío');
       }
     } catch (error) {
-      report.subsystems.push({
-        name: 'ConfigManager',
-        status: 'CRITICAL',
-        message: `Error al validar configuración: ${error instanceof Error ? error.message : String(error)}`
-      });
+      report.modules.config = {
+        status: 'ERROR',
+        message: 'Error en la configuración del sistema',
+        details: error instanceof Error ? error.message : String(error)
+      };
+      report.errors.push(`Configuración: ${report.modules.config.details}`);
       report.isReadyToLaunch = false;
     }
 
-    // 2. Diagnóstico de SecureVault
+    // Diagnóstico de SecureVault
     try {
-      // Try to get a test credential to verify vault is accessible and decryptable
-      // Since we don't have test credentials, we'll try to access the vault file
-      // The SecureVault constructor already tries to read the vault file
-      // We'll attempt a simple operation that doesn't require existing credentials
-      report.subsystems.push({
-        name: 'SecureVault',
-        status: 'READY',
-        message: 'SecureVault inicializado correctamente'
-      });
+      // Intentar desencriptar un valor de prueba
+      const testValue = 'test-encryption-check';
+      const encrypted = await this.secureVault.encrypt(testValue);
+      const decrypted = await this.secureVault.decrypt(encrypted);
+      if (decrypted !== testValue) {
+        throw new Error('Fallo en la operación de encriptación/desencriptación');
+      }
     } catch (error) {
-      report.subsystems.push({
-        name: 'SecureVault',
-        status: 'CRITICAL',
-        message: `Error al inicializar SecureVault: ${error instanceof Error ? error.message : String(error)}`
-      });
+      report.modules.secureVault = {
+        status: 'ERROR',
+        message: 'Error en SecureVault',
+        details: error instanceof Error ? error.message : String(error)
+      };
+      report.errors.push(`SecureVault: ${report.modules.secureVault.details}`);
       report.isReadyToLaunch = false;
     }
 
-    // 3. Diagnóstico de Memoria (LanceDB)
+    // Diagnóstico de Memoria (LanceDB)
     try {
-      // Try to initialize the memory engine
-      await this.memory.init();
-      // Try a simple recall operation to verify LanceDB is working
-      // Since we don't have test data, we'll just check if init succeeded
-      report.subsystems.push({
-        name: 'MemoryEngine',
-        status: 'READY',
-        message: 'MemoryEngine inicializado correctamente y LanceDB accesible'
-      });
+      // Intentar inicializar y hacer una consulta de prueba
+      await this.memoryEngine.initialize();
+      // Hacer una consulta de prueba ligera
+      const testQuery = 'test-readiness-check';
+      const results = await this.memoryEngine.search(testQuery, 1);
+      if (!Array.isArray(results)) {
+        throw new Error('Formato inesperado de resultados de búsqueda');
+      }
     } catch (error) {
-      report.subsystems.push({
-        name: 'MemoryEngine',
-        status: 'CRITICAL',
-        message: `Error al inicializar MemoryEngine: ${error instanceof Error ? error.message : String(error)}`
-      });
+      report.modules.memory = {
+        status: 'ERROR',
+        message: 'Error en MemoryEngine',
+        details: error instanceof Error ? error.message : String(error)
+      };
+      report.errors.push(`MemoryEngine: ${report.modules.memory.details}`);
       report.isReadyToLaunch = false;
     }
 
-    // 4. Diagnóstico Financiero
+    // Diagnóstico Financiero
     try {
-      // Try to get the current balance to verify ledger is accessible
-      // FinancialAutonomyEngine doesn't expose currentBalance directly, but we can check if it loads
-      // The constructor already tries to load the ledger
-      report.subsystems.push({
-        name: 'FinancialAutonomyEngine',
-        status: 'READY',
-        message: 'FinancialAutonomyEngine inicializado correctamente y ledger accesible'
-      });
+      // Intentar leer el ledger y verificar el balance
+      const ledger = await this.financialEngine.getLedger();
+      if (!ledger || typeof ledger.balance !== 'number') {
+        throw new Error('Ledger no válido o balance no numérico');
+      }
     } catch (error) {
-      report.subsystems.push({
-        name: 'FinancialAutonomyEngine',
-        status: 'CRITICAL',
-        message: `Error al inicializar FinancialAutonomyEngine: ${error instanceof Error ? error.message : String(error)}`
-      });
+      report.modules.financial = {
+        status: 'ERROR',
+        message: 'Error en FinancialAutonomyEngine',
+        details: error instanceof Error ? error.message : String(error)
+      };
+      report.errors.push(`FinancialEngine: ${report.modules.financial.details}`);
       report.isReadyToLaunch = false;
-    }
-
-    // Additional checks for critical subsystems
-    try {
-      // Check if we can get browser config
-      const browserConfig = this.config.getBrowserConfig();
-      // This is just to verify the config manager is working for other sections
-    } catch (error) {
-      // Not critical, but log it
-      report.subsystems.push({
-        name: 'BrowserConfig',
-        status: 'WARNING',
-        message: `Error al acceder a BrowserConfig: ${error instanceof Error ? error.message : String(error)}`
-      });
-    }
-
-    try {
-      // Check if we can get financial config
-      const financialConfig = this.config.getFinancialConfig();
-      // This is just to verify the config manager is working for other sections
-    } catch (error) {
-      // Not critical, but log it
-      report.subsystems.push({
-        name: 'FinancialConfig',
-        status: 'WARNING',
-        message: `Error al acceder a FinancialConfig: ${error instanceof Error ? error.message : String(error)}`
-      });
     }
 
     return report;
   }
 }
+
+export { SystemReadiness, SystemReadinessReport };

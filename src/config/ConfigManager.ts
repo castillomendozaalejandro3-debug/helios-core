@@ -1,161 +1,124 @@
-import { config as dotenvConfig } from 'dotenv';
-import { z } from 'zod';
+import * as dotenv from 'dotenv';
 
-// Load environment variables from .env file
-dotenvConfig({ path: '.env' });
+// Cargar variables de entorno desde el archivo .env
+dotenv.config();
 
-// Define validation schemas for different configuration sections
-const SecurityConfigSchema = z.object({
-  HELIOS_MASTER_KEY: z.string().min(1, 'HELIOS_MASTER_KEY is required'),
-  STRIPE_SECRET_KEY: z.string().min(1, 'STRIPE_SECRET_KEY is required'),
-  OPENAI_API_KEY: z.string().min(1, 'OPENAI_API_KEY is required'),
-  GITHUB_TOKEN: z.string().min(1, 'GITHUB_TOKEN is required'),
-  GOOGLE_API_KEY: z.string().min(1, 'GOOGLE_API_KEY is required'),
-  AWS_ACCESS_KEY_ID: z.string().min(1, 'AWS_ACCESS_KEY_ID is required'),
-  AWS_SECRET_ACCESS_KEY: z.string().min(1, 'AWS_SECRET_ACCESS_KEY is required')
-});
-
-const BrowserConfigSchema = z.object({
-  BROWSER_USE_PROXY: z.string().optional(),
-  BROWSER_USE_HEADLESS: z.string().default('true').transform(val => val.toLowerCase() === 'true')
-});
-
-const FinancialConfigSchema = z.object({
-  FINANCIAL_DEFAULT_CURRENCY: z.string().default('USD'),
-  FINANCIAL_MINIMUM_BALANCE: z.string().default('500').transform(val => parseFloat(val))
-});
-
-const SecurityMonitoringConfigSchema = z.object({
-  SECURITY_AUDIT_LEVEL: z.string().default('HIGH'),
-  MONITORING_ENABLED: z.string().default('true').transform(val => val.toLowerCase() === 'true')
-});
-
-const LLMConfigSchema = z.object({
-  OPENROUTER_API_KEY: z.string().min(1, 'OPENROUTER_API_KEY is required'),
-  // Additional LLM configuration variables can be added here
-});
-
-// Define TypeScript interfaces
-export interface SecurityConfig {
-  HELIOS_MASTER_KEY: string;
-  STRIPE_SECRET_KEY: string;
-  OPENAI_API_KEY: string;
-  GITHUB_TOKEN: string;
-  GOOGLE_API_KEY: string;
-  AWS_ACCESS_KEY_ID: string;
-  AWS_SECRET_ACCESS_KEY: string;
+// Interfaces para tipado estricto
+interface SecurityConfig {
+  masterKey: string;
+  vaultPath: string;
+  encryptionAlgorithm: string;
 }
 
-export interface BrowserConfig {
-  BROWSER_USE_PROXY?: string;
-  BROWSER_USE_HEADLESS: boolean;
+interface LLMConfig {
+  provider: string;
+  model: string;
+  apiKey: string;
+  baseUrl: string;
+  temperature: number;
+  maxTokens: number;
 }
 
-export interface FinancialConfig {
-  FINANCIAL_DEFAULT_CURRENCY: string;
-  FINANCIAL_MINIMUM_BALANCE: number;
+interface FinancialConfig {
+  stripeSecretKey: string;
+  revenueThreshold: number;
+  currency: string;
 }
 
-export interface SecurityMonitoringConfig {
-  SECURITY_AUDIT_LEVEL: string;
-  MONITORING_ENABLED: boolean;
+interface BrowserConfig {
+  headless: boolean;
+  defaultTimeout: number;
+  userAgent: string;
 }
 
-export interface LLMConfig {
-  OPENROUTER_API_KEY: string;
-}
-
-export interface Config {
+// Configuración global
+interface HeliosConfig {
   security: SecurityConfig;
-  browser: BrowserConfig;
-  financial: FinancialConfig;
-  securityMonitoring: SecurityMonitoringConfig;
   llm: LLMConfig;
+  financial: FinancialConfig;
+  browser: BrowserConfig;
 }
 
-// Singleton class for configuration management
+// Validación de variables críticas
+const validateRequiredEnv = (key: string, value: string | undefined): void => {
+  if (!value || value.trim() === '') {
+    throw new Error(`Variable de entorno requerida faltante: ${key}`);
+  }
+};
+
+// Validación de formato numérico
+const validateNumericEnv = (key: string, value: string | undefined): number => {
+  if (!value || value.trim() === '') {
+    throw new Error(`Variable de entorno numérica requerida faltante: ${key}`);
+  }
+  const num = parseFloat(value);
+  if (isNaN(num)) {
+    throw new Error(`Variable de entorno numérica inválida: ${key} = ${value}`);
+  }
+  return num;
+};
+
+// Clase singleton para el gestor de configuración
 class ConfigManager {
   private static instance: ConfigManager;
-  private config: Config;
+  private config: HeliosConfig;
 
   private constructor() {
-    // Validate and parse environment variables
-    const securityConfig = SecurityConfigSchema.safeParse(process.env);
-    const browserConfig = BrowserConfigSchema.safeParse(process.env);
-    const financialConfig = FinancialConfigSchema.safeParse(process.env);
-    const securityMonitoringConfig = SecurityMonitoringConfigSchema.safeParse(process.env);
-    const llmConfig = LLMConfigSchema.safeParse(process.env);
+    // Validar variables críticas
+    validateRequiredEnv('HELIOS_MASTER_KEY', process.env.HELIOS_MASTER_KEY);
+    validateRequiredEnv('OPENROUTER_API_KEY', process.env.OPENROUTER_API_KEY);
+    validateRequiredEnv('STRIPE_SECRET_KEY', process.env.STRIPE_SECRET_KEY);
 
-    // Check for validation errors
-    if (!securityConfig.success) {
-      throw new Error(`Configuration validation error in SecurityConfig: ${securityConfig.error.message}`);
-    }
-    if (!browserConfig.success) {
-      throw new Error(`Configuration validation error in BrowserConfig: ${browserConfig.error.message}`);
-    }
-    if (!financialConfig.success) {
-      throw new Error(`Configuration validation error in FinancialConfig: ${financialConfig.error.message}`);
-    }
-    if (!securityMonitoringConfig.success) {
-      throw new Error(`Configuration validation error in SecurityMonitoringConfig: ${securityMonitoringConfig.error.message}`);
-    }
-    if (!llmConfig.success) {
-      throw new Error(`Configuration validation error in LLMConfig: ${llmConfig.error.message}`);
-    }
-
+    // Construir la configuración
     this.config = {
-      security: securityConfig.data,
-      browser: browserConfig.data,
-      financial: financialConfig.data,
-      securityMonitoring: securityMonitoringConfig.data,
-      llm: llmConfig.data
+      security: {
+        masterKey: process.env.HELIOS_MASTER_KEY!,
+        vaultPath: process.env.VAULT_PATH || './vault',
+        encryptionAlgorithm: process.env.ENCRYPTION_ALGORITHM || 'AES-256-GCM'
+      },
+      llm: {
+        provider: process.env.LLM_PROVIDER || 'openai',
+        model: process.env.LLM_MODEL || 'gpt-4',
+        apiKey: process.env.OPENAI_API_KEY || process.env.OPENROUTER_API_KEY!,
+        baseUrl: process.env.LLM_BASE_URL || 'https://api.openai.com/v1',
+        temperature: validateNumericEnv('LLM_TEMPERATURE', process.env.LLM_TEMPERATURE) || 0.7,
+        maxTokens: validateNumericEnv('LLM_MAX_TOKENS', process.env.LLM_MAX_TOKENS) || 4096
+      },
+      financial: {
+        stripeSecretKey: process.env.STRIPE_SECRET_KEY!,
+        revenueThreshold: validateNumericEnv('REVENUE_THRESHOLD', process.env.REVENUE_THRESHOLD) || 1000.0,
+        currency: process.env.CURRENCY || 'USD'
+      },
+      browser: {
+        headless: process.env.BROWSER_HEADLESS === 'true',
+        defaultTimeout: validateNumericEnv('BROWSER_TIMEOUT', process.env.BROWSER_TIMEOUT) || 30000,
+        userAgent: process.env.BROWSER_USER_AGENT || 'Helios Browser Agent'
+      }
     };
   }
 
-  public static getInstance(): ConfigManager {
+  static getInstance(): ConfigManager {
     if (!ConfigManager.instance) {
       ConfigManager.instance = new ConfigManager();
     }
     return ConfigManager.instance;
   }
 
-  // Typed access methods for different configuration sections
-  public getSecurityConfig(): SecurityConfig {
+  getSecurityConfig(): SecurityConfig {
     return this.config.security;
   }
 
-  public getBrowserConfig(): BrowserConfig {
-    return this.config.browser;
-  }
-
-  public getFinancialConfig(): FinancialConfig {
-    return this.config.financial;
-  }
-
-  public getSecurityMonitoringConfig(): SecurityMonitoringConfig {
-    return this.config.securityMonitoring;
-  }
-
-  public getLLMConfig(): LLMConfig {
+  getLLMConfig(): LLMConfig {
     return this.config.llm;
   }
 
-  // Generic method to get any configuration value (for advanced use cases)
-  public get<T>(key: string): T | undefined {
-    // This is a simplified implementation - in production, you might want a more sophisticated path-based access
-    // For now, we'll just return undefined for safety
-    return undefined;
+  getFinancialConfig(): FinancialConfig {
+    return this.config.financial;
   }
 
-  // Method to get all configuration (for debugging purposes only - should not be used in production)
-  public getAllConfig(): Config {
-    // Return a deep copy to prevent accidental mutation
-    return JSON.parse(JSON.stringify(this.config)) as Config;
+  getBrowserConfig(): BrowserConfig {
+    return this.config.browser;
   }
 }
 
-// Export the singleton instance
-export const ConfigManagerInstance = ConfigManager.getInstance();
-
-// Export the class for testing purposes
-export { ConfigManager };
+export { ConfigManager, SecurityConfig, LLMConfig, FinancialConfig, BrowserConfig };
