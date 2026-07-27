@@ -6,6 +6,7 @@ import { FinancialAutonomyEngine } from './economy/FinancialAutonomyEngine';
 import { AutonomousRevenueLoop } from './core/AutonomousRevenueLoop';
 import { Safeguards } from './safeguards/Safeguards';
 import { HealthDashboard } from './safeguards/HealthDashboard';
+import { SystemReadiness } from './core/SystemReadiness';
 import { MemoryEngine } from './memory/MemoryEngine';
 import { DecisionEngine } from './decision/DecisionEngine';
 import { PersonalityCore } from './personality/PersonalityCore';
@@ -24,6 +25,7 @@ class Helios {
   private revenueLoop: AutonomousRevenueLoop;
   private safeguards: Safeguards;
   private healthDashboard: HealthDashboard;
+  private systemReadiness: SystemReadiness;
 
   constructor() {
     // Inicialización de los núcleos reales
@@ -33,6 +35,7 @@ class Helios {
     this.health = new HealthMonitor();
     this.finance = new FinancialAutonomyEngine();
     this.revenueLoop = new AutonomousRevenueLoop();
+    this.systemReadiness = new SystemReadiness();
     
     // Inicialización de la capa de seguridad
     const agentFactory = new (require('./agents/AgentFactory').AgentFactory)();
@@ -51,19 +54,43 @@ class Helios {
 
   // Propósito: Iniciar todos los subsistemas de Helios.
   public async boot(): Promise<void> {
-    // 1. Inicializar la base de datos vectorial (LanceDB)
+    // 1. Ejecutar diagnóstico de sistema
+    console.log('Ejecutando diagnóstico de sistema...');
+    const readinessReport = await this.systemReadiness.runFullDiagnostic();
+    
+    if (!readinessReport.isReadyToLaunch) {
+      console.error('❌ Helios no está listo para arrancar. Reporte de diagnóstico:');
+      console.error(`   Timestamp: ${new Date(readinessReport.timestamp).toISOString()}`);
+      console.error(`   Estado general: ${readinessReport.isReadyToLaunch ? 'READY' : 'NOT READY'}`);
+      console.error('   Subsistemas:');
+      readinessReport.subsystems.forEach(subsystem => {
+        console.error(`     - ${subsystem.name}: ${subsystem.status} - ${subsystem.message}`);
+      });
+      if (readinessReport.missingEnvVariables.length > 0) {
+        console.error('   Variables de entorno faltantes:');
+        readinessReport.missingEnvVariables.forEach(varName => {
+          console.error(`     - ${varName}`);
+        });
+      }
+      console.error('❌ Helios se detendrá debido a errores críticos en el diagnóstico.');
+      process.exit(1);
+    }
+    
+    console.log('✅ Diagnóstico de sistema completado con éxito.');
+    
+    // 2. Inicializar la base de datos vectorial (LanceDB)
     await this.memory.init();
     
-    // 2. Cargar personalidad y estado financiero desde disco
+    // 3. Cargar personalidad y estado financiero desde disco
     // (Lógica real de carga de estado si aplica)
     
-    // 3. Arrancar el bucle de supervivencia económica
+    // 4. Arrancar el bucle de supervivencia económica
     this.revenueLoop.start(3600000); // Evaluar cada 1 hora
     
-    // 4. Iniciar el dashboard de salud
+    // 5. Iniciar el dashboard de salud
     this.healthDashboard.startMonitoring(30000);
     
-    // 5. Configurar el apagado seguro
+    // 6. Configurar el apagado seguro
     this.setupGracefulShutdown();
   }
 
