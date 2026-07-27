@@ -2,10 +2,12 @@ node_modules/
 dist/ 
 dist-runtime/ 
 .env 
+.env.local
+.helios_vault.enc
+ledger.json
+evolution_reports/
 *.log 
 .DS_Store 
 *.sqlite 
 temp/ 
 .cache/ 
-.helios_vault.enc
-.env.local
