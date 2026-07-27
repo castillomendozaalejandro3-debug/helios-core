@@ -7,3 +7,5 @@ dist-runtime/
 *.sqlite 
 temp/ 
 .cache/ 
+.helios_vault.enc
+.env.local
