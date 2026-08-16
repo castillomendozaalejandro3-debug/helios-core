@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Helios Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      padding: 2rem;
+      border-bottom: 2px solid #e94560;
+    }
+    .header h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(90deg, #e94560, #ff6b6b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header p { color: #888; margin-top: 0.5rem; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      padding: 2rem;
+    }
+    .card {
+      background: #16162a;
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid #2a2a4a;
+    }
+    .card h3 {
+      color: #e94560;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #2a2a4a;
+    }
+    .metric:last-child { border-bottom: none; }
+    .metric-value { color: #4ecca3; font-weight: bold; }
+    .status-ok { color: #4ecca3; }
+    .status-warn { color: #ffd93d; }
+    .status-error { color: #e94560; }
+    .kill-switch {
+      background: #e94560;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 1rem;
+    }
+    .kill-switch:hover { background: #ff6b6b; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Helios Core</h1>
+    <p>Entidad de Software Autonoma - Dashboard de Control</p>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Salud del Sistema</h3>
+      <div id="health-metrics">Cargando...</div>
+    </div>
+
+    <div class="card">
+      <h3>Finanzas</h3>
+      <div id="financial-metrics">Cargando...</div>
+    </div>
+
+    <div class="card">
+      <h3>Agentes</h3>
+      <div id="agent-metrics">Cargando...</div>
+    </div>
+
+    <div class="card">
+      <h3>Memoria</h3>
+      <div id="memory-metrics">Cargando...</div>
+    </div>
+
+    <div class="card">
+      <h3>Safeguards</h3>
+      <div id="safeguard-metrics">Cargando...</div>
+      <button class="kill-switch" onclick="triggerKillSwitch()">ACTIVAR KILL SWITCH</button>
+    </div>
+
+    <div class="card">
+      <h3>Rendimiento</h3>
+      <div id="performance-metrics">Cargando...</div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:3000';
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch(`${API_URL}/status`);
+        const data = await res.json();
+        updateDashboard(data);
+      } catch (err) {
+        console.error('Error fetching status:', err);
+      }
+    }
+
+    function updateDashboard(data) {
+      const health = data.helios ? `
+        <div class="metric"><span>Estado</span><span class="status-ok">Activo</span></div>
+        <div class="metric"><span>Version</span><span class="metric-value">${data.helios.version}</span></div>
+        <div class="metric"><span>Uptime</span><span>${Math.floor(data.helios.uptime / 60)}m</span></div>
+        <div class="metric"><span>Autonomia</span><span class="metric-value">Nivel ${data.helios.autonomyLevel}</span></div>
+      ` : 'No disponible';
+      document.getElementById('health-metrics').innerHTML = health;
+
+      const fin = data.financial ? `
+        <div class="metric"><span>Balance</span><span class="metric-value">$${data.financial.balance.toFixed(2)}</span></div>
+        <div class="metric"><span>Ingresos</span><span class="status-ok">$${data.financial.totalIncome.toFixed(2)}</span></div>
+        <div class="metric"><span>Gastos</span><span class="status-error">$${data.financial.totalExpenses.toFixed(2)}</span></div>
+        <div class="metric"><span>Neto</span><span class="${data.financial.netProfit >= 0 ? 'status-ok' : 'status-error'}">$${data.financial.netProfit.toFixed(2)}</span></div>
+      ` : 'No disponible';
+      document.getElementById('financial-metrics').innerHTML = fin;
+
+      const agents = data.agents ? `
+        <div class="metric"><span>Total</span><span>${data.agents.total}</span></div>
+        <div class="metric"><span>Activos</span><span class="status-ok">${data.agents.running}</span></div>
+        <div class="metric"><span>Caidos</span><span class="${data.agents.crashed > 0 ? 'status-error' : 'status-ok'}">${data.agents.crashed}</span></div>
+      ` : 'No disponible';
+      document.getElementById('agent-metrics').innerHTML = agents;
+
+      const mem = data.memory ? `
+        <div class="metric"><span>Episodica</span><span>${data.memory.episodic || 0}</span></div>
+        <div class="metric"><span>Semantica</span><span>${data.memory.semantic || 0}</span></div>
+        <div class="metric"><span>Procedimental</span><span>${data.memory.procedural || 0}</span></div>
+      ` : 'No disponible';
+      document.getElementById('memory-metrics').innerHTML = mem;
+
+      const safe = data.safeguards ? `
+        <div class="metric"><span>Estado</span><span class="${data.safeguards.active ? 'status-ok' : 'status-error'}">${data.safeguards.active ? 'Protegido' : 'Inactivo'}</span></div>
+        <div class="metric"><span>Kill Switch</span><span class="${data.safeguards.killSwitch ? 'status-error' : 'status-ok'}">${data.safeguards.killSwitch ? 'ACTIVADO' : 'Standby'}</span></div>
+        <div class="metric"><span>Auditoria</span><span>${data.safeguards.auditEntries} entradas</span></div>
+      ` : 'No disponible';
+      document.getElementById('safeguard-metrics').innerHTML = safe;
+
+      const sys = data.system ? `
+        <div class="metric"><span>Heap</span><span>${(data.system.memory.heapUsed / 1024 / 1024).toFixed(1)} MB</span></div>
+        <div class="metric"><span>Node</span><span>${data.system.nodeVersion}</span></div>
+        <div class="metric"><span>Plataforma</span><span>${data.system.platform}</span></div>
+      ` : 'No disponible';
+      document.getElementById('performance-metrics').innerHTML = sys;
+    }
+
+    async function triggerKillSwitch() {
+      if (!confirm('Estas seguro de activar el KILL SWITCH? Esto detendra Helios inmediatamente.')) return;
+      try {
+        await fetch(`${API_URL}/kill-switch`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason: 'manual-dashboard' }) });
+        alert('Kill Switch activado. Helios se esta deteniendo...');
+      } catch (err) {
+        alert('Error al activar Kill Switch');
+      }
+    }
+
+    fetchStatus();
+    setInterval(fetchStatus, 5000);
+  </script>
+</body>
+</html>

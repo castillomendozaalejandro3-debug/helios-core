@@ -1,0 +1,106 @@
+{
+  "fecha": "2026-08-15",
+  "version": "2.2.0",
+  "gaps": [
+    {
+      "modulo": "CrawlAgent",
+      "severidad": "CRITICA",
+      "problema": "executeStrategy() retorna strings simulados, NO hace scraping real",
+      "evidencia": "L41: return { type: \"css\", extracted: `Datos de ${url}` }",
+      "impacto": "Helios NO puede extraer datos reales de la web",
+      "fix_necesario": "Integrar Playwright real + parsing HTML con cheerio/jsdom",
+      "esfuerzo_estimado": "2-3 dias"
+    },
+    {
+      "modulo": "RevenueEngine",
+      "severidad": "CRITICA",
+      "problema": "invoice() solo registra ingreso ficticio en ledger, NO cobra de verdad",
+      "evidencia": "L58-69: financialEngine.recordIncome(contract.price, ...)",
+      "impacto": "Helios NO puede cobrar dinero real de clientes",
+      "fix_necesario": "Integrar Stripe API, PayPal API, o crypto wallets reales",
+      "esfuerzo_estimado": "3-5 dias"
+    },
+    {
+      "modulo": "AutonomousRevenueLoop",
+      "severidad": "CRITICA",
+      "problema": "seekWork() crea contratos simulados, NO busca trabajo en Upwork/Fiverr",
+      "evidencia": "L59-71: createContract(\"marketplace\", \"data_processing\", random_price)",
+      "impacto": "Helios NO puede encontrar trabajo real autonomamente",
+      "fix_necesario": "Integrar APIs de Upwork/Fiverr, o scraping de job boards",
+      "esfuerzo_estimado": "5-7 dias"
+    },
+    {
+      "modulo": "ModuleGenerator",
+      "severidad": "CRITICA",
+      "problema": "generate() retorna string de codigo, NO lo escribe ni ejecuta",
+      "evidencia": "L23-48: return template code string",
+      "impacto": "Helios NO puede crear nuevos modulos de codigo real",
+      "fix_necesario": "Escribir a disco con fs.writeFile, ejecutar tests, compilar",
+      "esfuerzo_estimado": "2-3 dias"
+    },
+    {
+      "modulo": "SelfRefactorer",
+      "severidad": "ALTA",
+      "problema": "analyze() cuenta lineas y complejidad, pero NO modifica codigo real",
+      "evidencia": "L24-43: Analisis estatico basico, sin modificacion",
+      "impacto": "Helios NO puede auto-mejorar su propio codigo",
+      "fix_necesario": "Integrar AST parser (typescript), generar patches, aplicar cambios",
+      "esfuerzo_estimado": "5-7 dias"
+    },
+    {
+      "modulo": "BrowserAgent",
+      "severidad": "ALTA",
+      "problema": "Tiene Playwright real pero fallback a simulado, NO maneja CAPTCHA",
+      "evidencia": "L40: \"modo simulado\" si Playwright no disponible",
+      "impacto": "Navegacion real posible pero fragil sin anti-detection",
+      "fix_necesario": "Eliminar fallback simulado, integrar CAPTCHASolver, proxies rotativos",
+      "esfuerzo_estimado": "2-3 dias"
+    },
+    {
+      "modulo": "RPABrowser",
+      "severidad": "ALTA",
+      "problema": "Tiene Playwright pero modo simulado, NO controla mouse/teclado del OS",
+      "evidencia": "L86: \"modo simulado\" si Playwright no disponible",
+      "impacto": "NO puede controlar aplicaciones de escritorio reales",
+      "fix_necesario": "Integrar robotjs/@nut-tree/nut.js para control nativo",
+      "esfuerzo_estimado": "3-4 dias"
+    },
+    {
+      "modulo": "CAPTCHASolver",
+      "severidad": "MEDIA",
+      "problema": "Detecta CAPTCHAs pero NO los resuelve automaticamente (solo evasion)",
+      "evidencia": "L136-157: Solo reintentos con scroll/mouse, no resolucion",
+      "impacto": "Bloqueado en sitios con CAPTCHA fuerte",
+      "fix_necesario": "Integrar 2captcha/anti-captcha API, o vision LLM para resolver",
+      "esfuerzo_estimado": "1-2 dias"
+    },
+    {
+      "modulo": "AgentOrchestrator",
+      "severidad": "ALTA",
+      "problema": "Estructura basica, NO orquesta agentes reales en paralelo",
+      "evidencia": "80 lineas, solo cola de tareas simple",
+      "impacto": "NO puede ejecutar multiples agentes coordinados",
+      "fix_necesario": "Implementar worker pool, IPC real, monitoreo de agentes",
+      "esfuerzo_estimado": "3-4 dias"
+    },
+    {
+      "modulo": "CloneFactory",
+      "severidad": "MEDIA",
+      "problema": "Clones son objetos en memoria, NO procesos aislados reales",
+      "evidencia": "474 lineas, crea objetos JS, no child_process.fork",
+      "impacto": "NO hay aislamiento real, un crash afecta todo",
+      "fix_necesario": "Usar child_process.fork o Worker Threads para aislamiento real",
+      "esfuerzo_estimado": "3-4 dias"
+    }
+  ],
+  "resumen": {
+    "modulos_reales": 1,
+    "modulos_mixtos": 2,
+    "modulos_stubs": 0,
+    "modulos_minimales": 3,
+    "gaps_criticos": 4,
+    "gaps_altos": 4,
+    "gaps_medios": 2,
+    "tiempo_estimado_dias": 29
+  }
+}
